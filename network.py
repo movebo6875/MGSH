@@ -81,11 +81,6 @@ class TxtModule(BasicModule):
 
 
 class MetaSimilarityImportanceAssignmentNetwork(nn.Module):
-    """
-    Meta Similarity Importance Assignment Network (MSIAN)
-    Meta network for dynamically assigning sample weights
-    """
-
     def __init__(self, input_dim, hidden_dim=None):
         super(MetaSimilarityImportanceAssignmentNetwork, self).__init__()
         # hidden_dim = input_dim // 2 if hidden_dim is None else hidden_dim
@@ -131,14 +126,6 @@ class CombinedNet(nn.Module):
         return u, v
     
 def cross_modal_contrastive_ctriterion_q(fea, tau=1.0, q=1.0, opt=None):
-    """
-    Cross-modal contrastive loss (in q-GCE form)
-    fea: list of two feature tensors [B×bit, B×bit]
-    tau: temperature parameter
-    q:   q parameter
-    opt: optional dict, internal fields not used
-    """
-
     n_view    = 2
     batch_size = fea[0].shape[0]
    

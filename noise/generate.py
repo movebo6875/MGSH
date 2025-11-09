@@ -19,19 +19,6 @@ import numpy as np
 
 
 def add_noise_to_labels(labels, noise_rate):
-    """
-    Add noise to a multi-label one-hot matrix:
-        - Randomly select a portion of samples (based on noise_rate)
-        - For each selected sample:
-            - Flip one positive label (1 → 0)
-            - Flip one negative label (0 → 1)
-    Args:
-        labels: np.ndarray, shape (N, C), original multi-label one-hot matrix
-        noise_rate: float in [0, 1], proportion of samples to inject noise into
-    Returns:
-        labels: np.ndarray, shape (N, C), label matrix with noise
-    """
-    
     num_samples, num_labels = labels.shape
     num_noise = int(num_samples * noise_rate)
     noise_indices = np.random.choice(num_samples, num_noise, replace=False)
@@ -50,13 +37,13 @@ def add_noise_to_labels(labels, noise_rate):
 
 def generate_noise_F(noise):
     noise_rate = noise
-    data = h5py.File('./data/MIRFlickr.h5', 'r')
+    data = h5py.File('./data/MIRFlickr.h5', 'r') 
     for i in noise_rate:
         labels_matrix = np.array(list(data['LabTrain']))
         labels_matrix2 = np.array(list(data['LabTrain']))
         noisy_labels_matrix = add_noise_to_labels(labels_matrix, i)
 
-        output_file = h5py.File('./noise/mirflickr25k-lall-noise_{}.h5'.format(i), 'w')
+        output_file = h5py.File('./noise/mirflickr25k-lall-noise_{}.h5'.format(i), 'w')  
 
         output_file.create_dataset('result', data=noisy_labels_matrix)
         output_file.create_dataset('True', data=labels_matrix2)
@@ -80,13 +67,13 @@ def generate_noise_N(noise):
         output_file.close()
 
 def generate_noise_M(noise_rates, 
-                     h5_path='/data1/tza/NRCH-master/data/MS-COCO_rand_combined.h5', 
+                     h5_path='./data/MS-COCO_rand_combined.h5', 
                      out_dir='./noise'):
     os.makedirs(out_dir, exist_ok=True)
 
     # 1) Read original labels
     with h5py.File(h5_path, 'r') as hf:
-        print("原 H5 键名:", list(hf.keys()))
+        print("Original H5 key name: ", list(hf.keys()))
         if 'LabTrain' not in hf:
             raise KeyError("Cannot find 'LabTrain', please check the key name.")
         labels = hf['LabTrain'][:]  
@@ -190,5 +177,5 @@ def plot_and_output_row(data, is_hdf5_format, row_idx=0):
   
 if __name__ == "__main__":  
     noise_rate = [0.2,0.5,0.8]
-    generate_noise_N(noise_rate)
+    generate_noise_F(noise_rate)
 

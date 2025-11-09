@@ -94,12 +94,12 @@ def generate_meta_dataset(
 
 if __name__ == "__main__":  
     META_RATE = 0.02
-    file_path = r'data/nus-wide-tc10-xall-vgg-clean.mat'
+    file_path = r'NRCH-master/data/mirflickr25k-iall-vgg.mat'  
     data, is_hdf5_format = load_mat(file_path)
     # plot_and_output_row(data, is_hdf5_format, row_idx=0)  
     generate_meta_dataset(
-        input_h5_path  = 'data/NUS-WIDE.h5',
-        output_h5_path = 'meta/NUS-WIDE-meta.h5',
+        input_h5_path  = '/MGSH-master/data/MIRFlickr.h5',   
+        output_h5_path = '/MGSH-master/meta/MIRFlickr-meta.h5',  
         split_name     = 'DataBase',
         # num_meta =  2000,
         meta_ratio       = META_RATE,

@@ -14,15 +14,13 @@ def get_config(dataset, bit_len, noise_rate, Lambda,epoch,r,margin,tao):
    
     if dataset == 'flickr':
         train_size, n_class, tag_len = 9500, 24, 1386
-        meta_data_path=r'/data1/tza/NRCH-master/meta/mirflickr25k-meta.h5'
+        meta_data_path=r'/MGSH-master/meta/MIRFlickr-meta.h5' 
     elif dataset == 'ms-coco':
         train_size, n_class, tag_len = 10000, 80, 300
-        meta_data_path=r'/data1/tza/NRCH-master/meta/MS-COCO-meta.h5'
+        meta_data_path=r'/MGSH-master/meta/MS-COCO-meta.h5'
     elif dataset == 'nuswide10':
         train_size, n_class, tag_len = 10500, 10, 1000
-        meta_data_path=r'/data1/tza/NRCH-master/meta/NUS-WIDE-meta.h5'
-    elif dataset == 'iapr':
-        train_size, n_class, tag_len = 10000, 255, 2912
+        meta_data_path=r'/MGSH-master/meta/NUS-WIDE-meta.h5'
     else:
         raise ValueError(f"Unsupported dataset: {dataset}")
 
@@ -123,9 +121,6 @@ class Robust_Loss(torch.nn.Module):
         # 5) Total loss
         loss_vec = lam*loss_r + (1-lam)*(loss_ca + Q_loss)
 
-        # 6) Update centers (use provided w if given; otherwise compute default weights internally)
-        # self.update_centers(u, v, y, w)
-
         return loss_vec if return_vector else loss_vec.mean()
 
     def cross_modal_center_aggregation(self, u, v, y):
@@ -144,10 +139,6 @@ class Robust_Loss(torch.nn.Module):
         return (term_u+term_v).mean()
 
     def update_centers(self, u, v, y, w=None):
-        """
-        Dynamic center update: use given w if provided; otherwise compute weights internally based on features.
-        u, v: [B, L], y: [B, K], w: [B] or None
-        """
         B, L = u.size()
         
         if w is None:
@@ -176,12 +167,6 @@ def split_prob(prob, threshld):
     return (pred+0)
 
 def get_loss(net, txt_net, config, data_loader, epoch, W):
-    """
-    Returns:
-    sorted_losses: np.ndarray, shape (N, 1)
-    pred: torch.Tensor, shape (N,) — 0/1 mask, where 1 indicates clean samples
-    precision: float
-    """
 
     device = next(net.parameters()).device
     sample_losses = []
@@ -253,17 +238,6 @@ def l2m(img_net, txt_net, meta_net,
          meta_loader, meta_iter,
          images, tags, labels,
          W, config):
-    """
-    L2m meta-learning using Hamming distance to replace dot product:
-        1) Update the main network (opt_main) using clean meta-data
-        2) Compute the cleanliness weight w_det and adaptive margin γ̂ for the current training batch
-        3) Update the meta network (opt_meta) using w_det from the training batch
-
-    Returns:
-        w_meta: Weights of training samples output by the updated meta network, shape=[B]
-        gamma_hat: Adaptive margin vector, shape=[B]
-        meta_iter: Updated iterator
-    """
 
     device = next(img_net.parameters()).device
     eps = 1e-8
@@ -323,15 +297,7 @@ def l2m(img_net, txt_net, meta_net,
 
     return w_meta.detach(), gamma_hat.detach(), meta_iter
 
-def train_with_meta(config, bit,save_path, model_path):
-    """
-    Integrate l2b's Meta-Guided cross-modal hashing training, supporting warmup pre-training.
-    config should include:
-    - "warmup": number of warmup epochs
-    - "threshold": fixed threshold for GMM binarization
-    - "dataset", "noise_rate": used for visualization file naming
-    """
-
+def train_with_meta(config, bit, model_path):
     device    = config["device"]
     tag_len   = config["tag_len"]
     n_class   = config["n_class"]
@@ -501,25 +467,6 @@ def train_with_meta(config, bit,save_path, model_path):
                 all_loss = np.concatenate([l.numpy() for _, l in w_loss_batches])
 
                 os.makedirs('figure', exist_ok=True)
-                # # 1) MetaWeight distribution histogram
-                # plt.figure(figsize=(6, 4))
-                # plt.hist(all_w, bins=20)
-                # plt.xlabel('MetaWeight (w)')
-                # plt.ylabel('Number of samples')
-                # plt.title(f'MetaWeight distribution of Epoch {epoch+1}')
-                # plt.grid(linestyle='--', alpha=0.3)
-                # hist_path = f'figure/epoch_{epoch+1}_w_distribution.png'
-                # plt.tight_layout()
-                # plt.savefig(hist_path, dpi=400)
-                # plt.close()
-                # print(f"[Epoch {epoch+1}] MetaWeight distribution saved → {hist_path}")
-
-                # 2) MetaWeight vs Loss Heatmap Scatter Plot
-                # plot_metaweight_vs_loss(
-                #     all_w,
-                #     all_loss,
-                #     epoch=epoch,
-                # )
 
     print("Training finished.")
      
@@ -555,52 +502,19 @@ def test(config, bit, model_path):
                          txt_trn_label.numpy(), img_tst_label.numpy())
     print(f"Test Results: t2i_mAP: {t2i_mAP:.3f}, i2t_mAP: {i2t_mAP:.3f}")
 
-    # —— Calculate PR Curve ——
-    R_t2i, P_t2i = pr_curve1(
-        rB=img_trn_binary.numpy(), qB=txt_tst_binary.numpy(),
-        retrieval_L=img_trn_label.numpy(), query_L=txt_tst_label.numpy()
-    )
-    R_i2t, P_i2t = pr_curve1(
-        rB=txt_trn_binary.numpy(), qB=img_tst_binary.numpy(),
-        retrieval_L=txt_trn_label.numpy(), query_L=img_tst_label.numpy()
-    )
-
-
-    R_t2i_arr = np.array(R_t2i)
-    P_t2i_arr = np.array(P_t2i)
-    R_i2t_arr = np.array(R_i2t)
-    P_i2t_arr = np.array(P_i2t)
-
-   
-    print("\n--- T2I PR curve data ---")
-    print("\n--- T2I PR curve Recall ---")
-    for r in R_t2i_arr:
-        print(f"Recall={r:.4f}")
-
-    print("\n--- T2I PR curve Precision ---")
-    for p in P_t2i_arr:
-        print(f"Precision={p:.4f}")
-
-    print("\n--- I2T PR curve Recall ---")
-    for r in R_i2t_arr:
-        print(f"Recall={r:.4f}")
-
-    print("\n--- I2T PR curve Precision ---")
-    for p in P_i2t_arr:
-        print(f"Precision={p:.4f}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run CSQ training and testing')
-    parser.add_argument('--gpus',        type=str,   default='0')
-    parser.add_argument('--hash_dim',    type=int,   default=128, help='Hash code length')
-    parser.add_argument('--epoch',    type=int,   default=60, help='Epochs for training')
+    parser.add_argument('--gpus',        type=str,   default='3')
+    parser.add_argument('--hash_dim',    type=int,   default=16, help='Hash code length')
+    parser.add_argument('--epoch',    type=int,   default=100, help='Epochs for training')
     parser.add_argument('--noise_rate',  type=float, default=0.5, help='Noise rate')
     parser.add_argument('--dataset',     type=str,   default='flickr',
                         choices=['flickr','nuswide10','ms-coco'], help='Dataset name')
-    parser.add_argument('--Lambda',      type=float, default=0.5, help='Lambda weight in the loss function')
-    parser.add_argument('--r',      type=float, default=0.7, help='Weight in the category center clustering loss')
+    parser.add_argument('--Lambda',      type=float, default=0.7, help='Lambda weight in the loss function')
+    parser.add_argument('--r',      type=float, default=0.5, help='Weight in the category center clustering loss')
     parser.add_argument('--margin',      type=float, default=0.5, help='Initial distance')
-    parser.add_argument('--tao',      type=float, default=0.5)
+    parser.add_argument('--tau',      type=float, default=0.5)
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
 
@@ -613,13 +527,12 @@ if __name__ == '__main__':
         epoch=args.epoch,
         r=args.r,
         margin=args.margin,
-        tao=args.tao
+        tao=args.tau
     )
-    save_path = f"map_curve_{config['dataset']}_noise{config['noise_rate']}.png"
     model_path = f"./checkpoint/best_model_{config['dataset']}_noise{config['noise_rate']:.2f}_{args.hash_dim}.pth"
 
     print("Current configuration:", config)
-    train_with_meta(config, args.hash_dim,save_path,model_path)
+    train_with_meta(config, args.hash_dim,model_path)
     print("Current configuration:", config)
     test(config,  args.hash_dim,model_path)
 

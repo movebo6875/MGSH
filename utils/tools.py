@@ -183,7 +183,7 @@ class DataList(Dataset):
 def SaveH5File_F(resize_size):
     train_size = 9500
     query_size = 1900
-    root = './data/'
+    root = './data/'   
     fi = sio.loadmat(os.path.join(root, 'mirflickr25k-iall-vgg.mat'))['XAll']
     fl = sio.loadmat(os.path.join(root, 'mirflickr25k-lall.mat'))['LAll']
     ft = sio.loadmat(os.path.join(root, 'mirflickr25k-yall.mat'))['YAll']
@@ -260,7 +260,7 @@ def SaveH5File_C(resize_size):
     query_size = 5000
 
     # Path configuration 
-    root       = '/data1/tza/NRCH-master/data'
+    root       = './data'
     in_path    = os.path.join(root, 'MSCOCO_deep_doc2vec_data_rand.h5py')
     out_path   = os.path.join(root, 'MS-COCO_rand_combined.h5')
 
@@ -273,7 +273,7 @@ def SaveH5File_C(resize_size):
 
     # Verify total number of samples
     N = XAll.shape[0]
-    assert LAll.shape[0] == N and YAll.shape[0] == N, "三个数组样本数不一致！"
+    assert LAll.shape[0] == N and YAll.shape[0] == N, "The three arrays have inconsistent numbers of samples."
 
     # Split subset
     ImgQuery    = XAll[0:query_size]
@@ -364,7 +364,7 @@ def SaveH5File_N(resize_size):
     hf_out.close()
 
 def SaveH5File_I(resize_size):
-    root = '../data/'
+    root = './data/'
     file_path = os.path.join(root, 'iapr-tc12-rand.mat')
     data = sio.loadmat(file_path)
     valid_img = data['VDatabase'].astype('float32')
@@ -949,8 +949,7 @@ def record_pr_curve(R, P, method_name, save_dir, task):
 
 if __name__ == "__main__":
     # SaveH5File_I(256)
-    # SaveH5File_F(256)
+    SaveH5File_F(256)
     # SaveH5File_C(256)
-    SaveH5File_N(256)
-    # file_path = "/data1/tza/NRCH-master/data/MSCOCO_deep_doc2vec_data_rand.h5py"
+    # SaveH5File_N(256)
     # visualize_shapes(file_path)
