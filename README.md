@@ -1,10 +1,10 @@
-## Meta-Guided Sample Reweighting for Robust Cross-Modal Hashing Retrieval with Noisy labels
+# Meta-Guided Sample Reweighting for Robust Cross-Modal Hashing Retrieval with Noisy labels
 
 PyTorch implementation for Meta-Guided Sample Reweighting for Robust Cross-Modal Hashing Retrieval with Noisy labels. (AAAI 2026)
 
 ## MGSH framework
 
-Overview of the MGSH framework. The framework consists of three main components: (1) Feature Extraction: A dual-stream encoder processes training and meta samples to obtain modality-specific representations. (2) Bi-level Network Architecture: Based on the meta-importance weights, the main model **$\mathcal{F}_{\Theta}$** computes a robust hashing loss function, while the meta model **$ \mathcal{G}_{\Phi} $**reweights the samples and provides the updated weights to the main model. (3) Meta Pipeline: The meta-learning process updates the parameters of both models, enabling robust sample reweighting and adaptive margin adjustment.
+Overview of the MGSH framework. The framework consists of three main components: (1) Feature Extraction: A dual-stream encoder processes training and meta samples to obtain modality-specific representations. (2) Bi-level Network Architecture: Based on the meta-importance weights, the main model **$\mathcal{F}_{\Theta}$** computes a robust hashing loss function, while the meta model **$ \mathcal{G}_{\Phi} $** reweights the samples and provides the updated weights to the main model. (3) Meta Pipeline: The meta-learning process updates the parameters of both models, enabling robust sample reweighting and adaptive margin adjustment.
 
 ![MGSH_framework](figure/MGSH_framework.png)
 
@@ -20,13 +20,13 @@ pip install -r requirements.txt
 ```
 
 
-Next, preprocess the dataset to generate the .h5 file and add noise. This can be done by running the following scripts:
+Next, preprocess the dataset to generate the `.h5` file (tools.py) and add noise (generate.py). This can be done by running the following scripts:
 
 ```bash
 python ./utils/tools.py
 python ./noise/generate.py
 ```
-Then in our model, we split a small meta-clean dataset from the `.h5` file :
+Then in our model, we split a small meta-clean dataset from  the generated `.h5` file before :
 
 ```bash
 python ./meta/generate_meta.py
@@ -41,5 +41,5 @@ python MGSH.py
 ```
 You can download MIRFlickr-25K dataset dataset from [here](https://drive.google.com/drive/folders/1GBMOXKT3lkb0mVFJ1nEozccnC-cGz_wb).
 
-## Experiment Results:
+## Experiment Results
 ![experiment](figure/experiment.png)
